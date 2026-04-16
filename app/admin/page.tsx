@@ -16,7 +16,7 @@ import {
 import Link from "next/link";
 import ProjectEditor from "./ProjectEditor";
 import { iCls, tCls, Toast, SectionCard, Field, ToggleRow } from "@/components/AdminUI";
-
+import { ChevronDown } from "lucide-react";
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "arpit2024";
 const SANITY_CONFIGURED = !!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 
@@ -671,24 +671,32 @@ function ContentView({ showToast }: { showToast: (m: string, t?: "success" | "er
         </div>
       </SectionCard>
 
-      {/* Social */}
-      <SectionCard title="Social Links">
-        {[
-          { key: "linkedinUrl",  label: "LinkedIn URL" },
-          { key: "behanceUrl",   label: "Behance URL" },
-          { key: "dribbbleUrl",  label: "Dribbble URL" },
-          { key: "twitterUrl",   label: "Twitter / X URL" },
-        ].map(({ key, label }) => (
-          <Field key={key} label={label}>
-            <div className="relative">
-              <LinkIcon size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25" />
-              <input value={(content as Record<string, unknown>)[key] as string || ""}
-                onChange={(e) => set(key as keyof SiteContent, e.target.value)}
-                placeholder="https://" className={`${iCls} pl-9`} />
-            </div>
-          </Field>
-        ))}
-      </SectionCard>
+     {/* Social */}
+<SectionCard title="Social Links">
+  {(
+    [
+      { key: "linkedinUrl", label: "LinkedIn URL" },
+      { key: "behanceUrl", label: "Behance URL" },
+      { key: "dribbbleUrl", label: "Dribbble URL" },
+      { key: "twitterUrl", label: "Twitter / X URL" },
+    ] as { key: keyof SiteContent; label: string }[]
+  ).map(({ key, label }) => (
+    <Field key={key} label={label}>
+      <div className="relative">
+        <LinkIcon
+          size={13}
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25"
+        />
+        <input
+          value={(content[key] as string) || ""}
+          onChange={(e) => set(key, e.target.value)}
+          placeholder="https://"
+          className={`${iCls} pl-9`}
+        />
+      </div>
+    </Field>
+  ))}
+</SectionCard>
 
       {/* Skills marquee */}
       <SectionCard title="Skills Marquee" desc="Comma-separated skills shown in the scrolling marquee">
