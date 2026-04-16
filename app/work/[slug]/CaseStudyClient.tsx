@@ -5,36 +5,26 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ExternalLink, ChevronUp } from "lucide-react";
 import { Project } from "@/lib/types";
-import { staticProjects } from "@/lib/projects";
 import ImageGallery from "@/components/ImageGallery";
 import PortfolioImage from "@/components/PortfolioImage";
 import { useInView } from "react-intersection-observer";
 
 interface Props { project: Project; }
 
-function useLiveProject(slug: string, fallback: Project): Project {
+function useLiveProject(slug: string, fallback: Project): { project: Project; allProjects: Project[] } {
   const [project, setProject] = useState<Project>(fallback);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
-      fetch(`/api/projects`)
-        .then((r) => r.ok ? r.json() : null)
-        .then((all: Project[] | null) => {
-          if (!all) return;
-          const found = all.find((p) => p.slug === slug);
-          if (found) setProject({ ...fallback, ...found });
-        })
-        .catch(() => {});
-      return;
-    }
-    try {
-      const stored = localStorage.getItem("admin_projects");
-      if (!stored) return;
-      const all: Project[] = JSON.parse(stored);
-      const found = all.find((p) => p.slug === slug);
-      if (found) setProject({ ...fallback, ...found });
-    } catch { /* ignore */ }
+    fetch(`/api/projects`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((all: Project[]) => {
+        setAllProjects(all);
+        const found = all.find((p) => p.slug === slug);
+        if (found) setProject({ ...fallback, ...found });
+      })
+      .catch(() => {});
   }, [slug, fallback]);
-  return project;
+  return { project, allProjects };
 }
 
 function ScrollProgress({ accentColor }: { accentColor: string }) {
@@ -80,13 +70,14 @@ const S = "py-12 md:py-20 px-5 md:px-8 lg:px-12";
 const SW = "max-w-6xl mx-auto";
 
 export default function CaseStudyClient({ project: fallback }: Props) {
-  const project = useLiveProject(fallback.slug, fallback);
+  const { project, allProjects } = useLiveProject(fallback.slug, fallback);
   const [backVisible, setBackVisible] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
 
-  const currentIndex = staticProjects.findIndex((p) => p.slug === project.slug);
-  const prevProject = currentIndex > 0 ? staticProjects[currentIndex - 1] : null;
-  const nextProject = currentIndex < staticProjects.length - 1 ? staticProjects[currentIndex + 1] : null;
+  const published = allProjects.filter((p) => p.status === "published");
+  const currentIndex = published.findIndex((p) => p.slug === project.slug);
+  const prevProject = currentIndex > 0 ? published[currentIndex - 1] : null;
+  const nextProject = currentIndex < published.length - 1 ? published[currentIndex + 1] : null;
 
   const images = project.images || [];
   const hasImages = images.length > 0;

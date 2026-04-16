@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { staticProjects } from "@/lib/projects";
 import { Project, ProjectStatus, SiteContent, defaultSiteContent, Review, Skill } from "@/lib/types";
 import { apiGetProjects, apiCreateProject, apiUpdateProject, apiDeleteProject } from "@/lib/api";
 import { getSiteContent, saveSiteContent, getReviews, saveReviews, getSkills, saveSkills, defaultReviews, defaultSkills } from "@/lib/siteContent";
@@ -18,40 +17,22 @@ import ProjectEditor from "./ProjectEditor";
 import { iCls, tCls, Toast, SectionCard, Field, ToggleRow } from "@/components/AdminUI";
 import { ChevronDown } from "lucide-react";
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "arpit2024";
-const SANITY_CONFIGURED = !!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 
 // ── Data hook ─────────────────────────────────────────────────────────────────
 function useProjects() {
-  const [data, setData] = useState<Project[]>(staticProjects);
+  const [data, setData] = useState<Project[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (SANITY_CONFIGURED) {
-      apiGetProjects().then(setData).catch(() => {}).finally(() => setLoaded(true));
-    } else {
-      try {
-        const stored = localStorage.getItem("admin_projects");
-        if (stored) setData(JSON.parse(stored));
-      } catch { /* ignore */ }
-      setLoaded(true);
-    }
+    apiGetProjects().then(setData).catch(() => {}).finally(() => setLoaded(true));
   }, []);
 
   const save = useCallback(async (updated: Project[], changedProject?: Project, isNew?: boolean, deletedId?: string) => {
     setData(updated);
-    if (SANITY_CONFIGURED) {
-      if (deletedId) await apiDeleteProject(deletedId);
-      else if (changedProject) {
-        if (isNew) await apiCreateProject(changedProject);
-        else await apiUpdateProject(changedProject);
-      }
-    } else {
-      const safe = updated.map((p) => ({
-        ...p,
-        thumbnail: p.thumbnail?.startsWith("data:") ? "" : p.thumbnail,
-        images: (p.images || []).map((img) => ({ ...img, url: img.url?.startsWith("data:") ? "" : img.url })),
-      }));
-      try { localStorage.setItem("admin_projects", JSON.stringify(safe)); } catch { /* quota */ }
+    if (deletedId) await apiDeleteProject(deletedId);
+    else if (changedProject) {
+      if (isNew) await apiCreateProject(changedProject);
+      else await apiUpdateProject(changedProject);
     }
   }, []);
 

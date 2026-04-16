@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import ProjectCard from "@/components/ProjectCard";
-import { staticProjects } from "@/lib/projects";
 import { Project } from "@/lib/types";
 import { useInView } from "react-intersection-observer";
 
@@ -20,22 +19,14 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
 }
 
 export default function WorkPage() {
-  const [allProjects, setAllProjects] = useState<Project[]>(staticProjects);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [active, setActive] = useState("All");
 
-  // Load live projects (from localStorage admin edits or API)
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
-      fetch("/api/projects")
-        .then((r) => r.ok ? r.json() : null)
-        .then((data: Project[] | null) => { if (data) setAllProjects(data); })
-        .catch(() => {});
-    } else {
-      try {
-        const stored = localStorage.getItem("admin_projects");
-        if (stored) setAllProjects(JSON.parse(stored));
-      } catch { /* ignore */ }
-    }
+    fetch("/api/projects")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: Project[]) => setAllProjects(data))
+      .catch(() => {});
   }, []);
 
   // Derive categories from actual projects
