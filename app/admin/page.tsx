@@ -926,7 +926,7 @@ function SettingsView({ showToast }: { showToast: (m: string, t?: "success" | "e
       <SectionCard title="Environment" desc="Current configuration status">
         <div className="space-y-2.5">
           {[
-            { label: "Sanity CMS",     ok: SANITY_CONFIGURED,                                    val: SANITY_CONFIGURED ? "Connected" : "Not configured (using localStorage)" },
+            { label: "Sanity CMS",     ok: !!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,           val: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ? "Connected" : "Not configured" },
             { label: "Admin Password", ok: !!process.env.NEXT_PUBLIC_ADMIN_PASSWORD,              val: process.env.NEXT_PUBLIC_ADMIN_PASSWORD ? "Set" : "Using default (insecure)" },
             { label: "EmailJS",        ok: !!process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,          val: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ? "Configured" : "Not configured" },
             { label: "Contact Email",  ok: !!process.env.NEXT_PUBLIC_CONTACT_EMAIL,               val: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "Not set" },

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { sanityClient } from "@/lib/sanity";
 import { toSanityProject, fromSanityProject } from "@/lib/sanityTransform";
 import { rateLimit, getIp } from "@/lib/rateLimit";
-import { staticProjects } from "@/lib/projects";
 
 const SANITY_CONFIGURED = !!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 
@@ -16,9 +15,7 @@ export async function GET(req: NextRequest) {
   if (!rateLimit(getIp(req), 60)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
-  if (!SANITY_CONFIGURED) {
-    return NextResponse.json(staticProjects);
-  }
+  if (!SANITY_CONFIGURED) return NextResponse.json([]);
   try {
     const docs = await sanityClient.fetch(`
       *[_type == "project"] | order(order asc) {
@@ -37,8 +34,8 @@ export async function GET(req: NextRequest) {
     `);
     return NextResponse.json(docs.map(fromSanityProject));
   } catch (err) {
-    console.error(err);
-    return NextResponse.json(staticProjects);
+    console.error("[GET /api/projects] error:", err);
+    return NextResponse.json([]);
   }
 }
 

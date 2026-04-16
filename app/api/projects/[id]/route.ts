@@ -16,7 +16,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const body = await req.json();
     const patch = toSanityProject(body);
-    const doc = await sanityClient.patch(id).set(patch).commit();
+
+    // Check if this is a real Sanity ID or a locally-generated one
+    // Sanity IDs contain letters; local ones are pure numeric timestamps
+    const isSanityId = /[a-zA-Z]/.test(id);
+
+    let doc;
+    if (isSanityId) {
+      // Real Sanity document — patch it
+      doc = await sanityClient.patch(id).set(patch).commit();
+    } else {
+      // Locally-generated ID — create a new document in Sanity instead
+      doc = await sanityClient.create({ ...patch, _type: "project" });
+    }
+
     return NextResponse.json(fromSanityProject(doc));
   } catch (err) {
     console.error(err);

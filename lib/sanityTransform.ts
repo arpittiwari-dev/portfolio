@@ -13,7 +13,8 @@ export function fromSanityProject(doc: any): Project {
     tags:             doc.tags             ?? [],
     accentColor:      doc.accentColor      ?? "#6C63FF",
     shortDescription: doc.shortDescription ?? "",
-    thumbnail:        doc.thumbnail        ?? "",    role:             doc.role             ?? "UI/UX Designer",
+    thumbnail:        doc.thumbnail        ?? "",
+    role:             doc.role             ?? "UI/UX Designer",
     timeline:         doc.timeline         ?? "",
     client:           doc.client           ?? "",
     tools:            doc.tools            ?? [],
@@ -27,11 +28,13 @@ export function fromSanityProject(doc: any): Project {
     results:          doc.results          ?? "",
     learnings:        doc.learnings        ?? "",
     metrics:          doc.metrics          ?? [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     images:           (doc.images ?? []).map((img: any) => ({
-      url:     img.url     ?? img.image?.asset?.url ?? "",
+      url:     img.url     ?? "",
       alt:     img.alt     ?? "",
       caption: img.caption ?? "",
-    })),    galleryLayout:    doc.galleryLayout    ?? "grid",
+    })),
+    galleryLayout:    doc.galleryLayout    ?? "grid",
     showResearch:     doc.showResearch     ?? true,
     showWireframes:   doc.showWireframes   ?? true,
     showPrototype:    doc.showPrototype    ?? false,
@@ -43,6 +46,7 @@ export function fromSanityProject(doc: any): Project {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function toSanityProject(p: Partial<Project>): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const doc: any = { _type: "project" };
 
   if (p.title            !== undefined) doc.title            = p.title;
@@ -75,12 +79,12 @@ export function toSanityProject(p: Partial<Project>): any {
   if (p.seoTitle         !== undefined) doc.seoTitle         = p.seoTitle;
   if (p.seoDescription   !== undefined) doc.seoDescription   = p.seoDescription;
 
-  // Thumbnail: store as plain URL string (asset already uploaded via /api/upload)
+  // Thumbnail: store as plain URL string (already uploaded via /api/upload)
   if (p.thumbnail !== undefined) {
     doc.thumbnail = p.thumbnail || null;
   }
 
-  // Images array
+  // Images: store as plain objects with url strings
   if (p.images !== undefined) {
     doc.images = p.images.map((img, i) => ({
       _key:    `img_${i}_${Date.now()}`,

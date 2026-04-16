@@ -1,24 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  trailingSlash: true,
   images: {
+    unoptimized: true,
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "cdn.sanity.io",
-      },
-      {
-        protocol: "https",
-        hostname: "*.sanity.io",
-      },
+      { protocol: "https", hostname: "cdn.sanity.io" },
     ],
-    dangerouslyAllowSVG: true,
-    contentDispositionType: "attachment",
-    formats: ["image/avif", "image/webp"],
   },
-  // Compress responses
   compress: true,
-  // Power by header off
   poweredByHeader: false,
 };
 
