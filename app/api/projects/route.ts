@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { sanityClient } from "@/lib/sanity";
 import { toSanityProject, fromSanityProject } from "@/lib/sanityTransform";
 import { rateLimit, getIp } from "@/lib/rateLimit";
+import { staticProjects } from "@/lib/projects";
+
+const SANITY_CONFIGURED = !!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 
 function isAuthed(req: NextRequest) {
   const token = req.headers.get("x-admin-token");
@@ -12,6 +15,9 @@ function isAuthed(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!rateLimit(getIp(req), 60)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+  if (!SANITY_CONFIGURED) {
+    return NextResponse.json(staticProjects);
   }
   try {
     const docs = await sanityClient.fetch(`
@@ -33,7 +39,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(docs.map(fromSanityProject));
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 });
+    return NextResponse.json(staticProjects);
   }
 }
 
