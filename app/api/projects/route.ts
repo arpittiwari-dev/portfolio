@@ -24,15 +24,14 @@ export async function GET(req: NextRequest) {
       *[_type == "project"] | order(order asc) {
         _id, title, "slug": slug.current, status, featured, order,
         category, tags, accentColor, shortDescription,
-        "thumbnail": thumbnail.asset->url,
+        thumbnail,
         role, timeline, client, tools, prototypeLink,
         overview, problem, goal, outcome,
         researchInsights, keyDecisions, results, learnings,
         metrics, galleryLayout, showResearch, showWireframes, showPrototype,
         seoTitle, seoDescription, _updatedAt,
         "images": images[]{
-          "url": image.asset->url,
-          alt, caption
+          url, alt, caption
         }
       }
     `);

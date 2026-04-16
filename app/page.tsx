@@ -7,10 +7,9 @@ import ProjectCard from "@/components/ProjectCard";
 import SkillsMarquee from "@/components/SkillsMarquee";
 import CountUp from "@/components/CountUp";
 import Button from "@/components/Button";
-import { getFeaturedProjects } from "@/lib/projects";
 import { useInView } from "react-intersection-observer";
 import { getSiteContent } from "@/lib/siteContent";
-import { defaultSiteContent, SiteContent } from "@/lib/types";
+import { defaultSiteContent, SiteContent, Project } from "@/lib/types";
 
 function Reveal({ children, delay = 0, className = "" }: {
   children: React.ReactNode; delay?: number; className?: string;
@@ -28,11 +27,23 @@ function Reveal({ children, delay = 0, className = "" }: {
 }
 
 export default function HomePage() {
-  const projects = getFeaturedProjects();
+  const [projects, setProjects] = useState<Project[]>([]);
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const { ref: statsRef, inView: statsInView } = useInView({ threshold: 0.2, triggerOnce: true });
 
-  useEffect(() => { setContent(getSiteContent()); }, []);
+  useEffect(() => {
+    setContent(getSiteContent());
+    // Fetch projects from API (falls back to static if Sanity not configured)
+    fetch("/api/projects")
+      .then((r) => r.json())
+      .then((data: Project[]) => {
+        const featured = data
+          .filter((p) => p.featured && p.status === "published")
+          .sort((a, b) => a.order - b.order);
+        setProjects(featured);
+      })
+      .catch(() => {});
+  }, []);
 
   const headlineLines = content.heroHeadline.split("\n");
 

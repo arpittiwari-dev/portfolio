@@ -13,8 +13,7 @@ export function fromSanityProject(doc: any): Project {
     tags:             doc.tags             ?? [],
     accentColor:      doc.accentColor      ?? "#6C63FF",
     shortDescription: doc.shortDescription ?? "",
-    thumbnail:        doc.thumbnail        ?? "",
-    role:             doc.role             ?? "UI/UX Designer",
+    thumbnail:        doc.thumbnail        ?? "",    role:             doc.role             ?? "UI/UX Designer",
     timeline:         doc.timeline         ?? "",
     client:           doc.client           ?? "",
     tools:            doc.tools            ?? [],
@@ -32,8 +31,7 @@ export function fromSanityProject(doc: any): Project {
       url:     img.url     ?? img.image?.asset?.url ?? "",
       alt:     img.alt     ?? "",
       caption: img.caption ?? "",
-    })),
-    galleryLayout:    doc.galleryLayout    ?? "grid",
+    })),    galleryLayout:    doc.galleryLayout    ?? "grid",
     showResearch:     doc.showResearch     ?? true,
     showWireframes:   doc.showWireframes   ?? true,
     showPrototype:    doc.showPrototype    ?? false,
@@ -77,11 +75,9 @@ export function toSanityProject(p: Partial<Project>): any {
   if (p.seoTitle         !== undefined) doc.seoTitle         = p.seoTitle;
   if (p.seoDescription   !== undefined) doc.seoDescription   = p.seoDescription;
 
-  // Thumbnail: if it's a CDN URL, store as reference; if raw URL just store string
+  // Thumbnail: store as plain URL string (asset already uploaded via /api/upload)
   if (p.thumbnail !== undefined) {
-    doc.thumbnail = p.thumbnail
-      ? { _type: "image", asset: { _type: "reference", _ref: p.thumbnail } }
-      : null;
+    doc.thumbnail = p.thumbnail || null;
   }
 
   // Images array
@@ -89,7 +85,7 @@ export function toSanityProject(p: Partial<Project>): any {
     doc.images = p.images.map((img, i) => ({
       _key:    `img_${i}_${Date.now()}`,
       _type:   "object",
-      image:   img.url ? { _type: "image", asset: { _type: "reference", _ref: img.url } } : null,
+      url:     img.url ?? "",
       alt:     img.alt,
       caption: img.caption ?? "",
     }));
