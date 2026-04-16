@@ -1,0 +1,138 @@
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --bg:          #080809;
+  --bg-elevated: #0f0f12;
+  --bg-subtle:   #141418;
+  --border:      rgba(255, 255, 255, 0.06);
+  --border-mid:  rgba(255, 255, 255, 0.10);
+  --text-1:      #EEECEA;
+  --text-2:      #7A7A8A;
+  --text-3:      #44445A;
+  --accent:      #6C63FF;
+  --accent-soft: rgba(108, 99, 255, 0.10);
+  --accent-mid:  rgba(108, 99, 255, 0.22);
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; padding: 0; margin: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text-1);
+  font-family: 'Satoshi', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Clash Display', sans-serif;
+  color: var(--text-1);
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #222230; border-radius: 2px; }
+
+/* ── Glow pulse ────────────────────────────────────────────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.5); }
+  50%       { box-shadow: 0 0 0 5px rgba(108, 99, 255, 0); }
+}
+.glow-pulse { animation: glow-pulse 2.4s ease-in-out infinite; }
+
+/* ── Marquee animations ────────────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.animate-marquee         { animation: marquee         28s linear infinite; }
+.animate-marquee-reverse { animation: marquee-reverse 28s linear infinite; }
+
+/* Pause on hover */
+.animate-marquee:hover,
+.animate-marquee-reverse:hover { animation-play-state: paused; }
+
+/* ── Custom cursor ─────────────────────────────────────────────────────────── */
+@media (pointer: fine) {
+  body { cursor: none; }
+  a, button, [data-cursor] { cursor: none; }
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid rgba(108, 99, 255, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: width 0.25s, height 0.25s, border-color 0.25s;
+}
+.cursor-dot.hovered  { width: 10px; height: 10px; background: white; }
+.cursor-ring.hovered { width: 48px; height: 48px; border-color: rgba(255,255,255,0.3); }
+
+/* ── Image shimmer ─────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.img-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* ── Noise overlay ─────────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.015'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* ── Focus visible ─────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Selection ─────────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(108, 99, 255, 0.3);
+  color: #fff;
+}
+
+/* ── Scrollbar hide utility ────────────────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
