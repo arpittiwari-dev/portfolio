@@ -3,6 +3,8 @@ import { getAllProjects, getProjectBySlug } from "@/lib/projects";
 import CaseStudyClient from "./CaseStudyClient";
 import type { Metadata } from "next";
 
+export const dynamicParams = true;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }

@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: asset.url, assetId: asset._id });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[upload] Sanity asset upload failed:", message);
+    return NextResponse.json({ error: "Upload failed", detail: message }, { status: 500 });
   }
 }
