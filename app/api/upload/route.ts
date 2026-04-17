@@ -10,6 +10,12 @@ function isAuthed(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!rateLimit(getIp(req), 10)) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   if (!isAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+  const dataset   = process.env.NEXT_PUBLIC_SANITY_DATASET || process.env.SANITY_DATASET;
+  const hasToken  = !!process.env.SANITY_API_TOKEN;
+  console.log("[upload] config →", { projectId, dataset, hasToken });
+
   try {
     const form = await req.formData();
     const file = form.get("file") as File | null;
