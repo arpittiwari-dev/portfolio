@@ -26,8 +26,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       // Real Sanity document — patch it
       doc = await sanityClient.patch(id).set(patch).commit();
     } else {
-      // Locally-generated ID — create a new document in Sanity instead
-      doc = await sanityClient.create({ ...patch, _type: "project" });
+      // Locally-generated ID — check if a doc with this slug already exists to avoid duplicates
+      const existing = patch.slug?.current
+        ? await sanityClient.fetch(`*[_type == "project" && slug.current == $slug][0]`, { slug: patch.slug.current })
+        : null;
+      if (existing) {
+        doc = await sanityClient.patch(existing._id).set(patch).commit();
+      } else {
+        doc = await sanityClient.create({ ...patch, _type: "project" });
+      }
     }
 
     return NextResponse.json(fromSanityProject(doc));
