@@ -34,7 +34,7 @@ export default function HomePage() {
   useEffect(() => {
     setContent(getSiteContent());
     // Fetch projects from API (falls back to static if Sanity not configured)
-    fetch("/api/projects")
+    fetch("/api/projects/")
       .then((r) => r.json())
       .then((data: Project[]) => {
         const featured = data

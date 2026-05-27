@@ -15,7 +15,7 @@ function useLiveProject(slug: string, fallback: Project): { project: Project; al
   const [project, setProject] = useState<Project>(fallback);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   useEffect(() => {
-    fetch(`/api/projects`)
+    fetch(`/api/projects/`)
       .then((r) => r.ok ? r.json() : [])
       .then((all: Project[]) => {
         setAllProjects(all);

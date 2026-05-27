@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sanityClient } from "@/lib/sanity";
+import { sanityWriteClient } from "@/lib/sanity";
 import { rateLimit, getIp } from "@/lib/rateLimit";
 
 function isAuthed(req: NextRequest) {
@@ -17,12 +17,21 @@ export async function POST(req: NextRequest) {
   console.log("[upload] config →", { projectId, dataset, hasToken });
 
   try {
-    const form = await req.formData();
+    let form: FormData;
+    try {
+      form = await req.formData();
+    } catch {
+      return NextResponse.json({ error: "Failed to parse form data — ensure Content-Type is multipart/form-data" }, { status: 400 });
+    }
+
     const file = form.get("file") as File | null;
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    if (!file.type.startsWith("image/")) {
+      return NextResponse.json({ error: "Only image files are supported" }, { status: 400 });
+    }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const asset = await sanityClient.assets.upload("image", buffer, {
+    const asset = await sanityWriteClient.assets.upload("image", buffer, {
       filename: file.name,
       contentType: file.type,
     });
