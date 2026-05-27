@@ -7,6 +7,17 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # SANITY_API_TOKEN must be set in Netlify dashboard → Site Settings → Environment Variables
+  # It is intentionally NOT committed here. Required for image uploads to work in production.
+
+# Increase body size limit for the upload API route (default is 1MB, images can be larger)
+[functions]
+  node_bundler = "nft"
+
+[[functions]]
+  path = "/api/upload"
+  [functions.config]
+    max_body_size = 10485760  # 10 MB in bytes
 
 [[headers]]
   for = "/*"
