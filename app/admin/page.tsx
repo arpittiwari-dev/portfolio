@@ -279,6 +279,13 @@ function DashboardView({ stats, projects, onEdit, onNew, setView }: {
   setView: (v: AdminView) => void;
 }) {
   const recent = [...projects].sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()).slice(0, 4);
+
+  // Live stats from API
+  const [liveStats, setLiveStats] = useState<{ projects: number; screens: number; satisfaction: number; tools: number } | null>(null);
+  useEffect(() => {
+    fetch("/api/stats/").then((r) => r.json()).then(setLiveStats).catch(() => {});
+  }, []);
+
   const statCards = [
     { label: "Total Projects", value: stats.total,     color: "#6C63FF", icon: FolderOpen },
     { label: "Published",      value: stats.published, color: "#22c55e", icon: Globe },
@@ -382,6 +389,40 @@ function DashboardView({ stats, projects, onEdit, onNew, setView }: {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Live stats from API */}
+          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display font-bold text-white text-sm">Live Stats</h2>
+              {liveStats && (
+                <span className="text-[10px] font-body text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">Live</span>
+              )}
+            </div>
+            {!liveStats ? (
+              <div className="space-y-2">
+                {[1,2,3,4].map((i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="h-3 w-20 rounded bg-white/[0.06] animate-pulse" />
+                    <div className="h-3 w-8 rounded bg-white/[0.06] animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {[
+                  { label: "Published projects", val: liveStats.projects },
+                  { label: "Total screens",       val: liveStats.screens },
+                  { label: "Satisfaction",        val: `${liveStats.satisfaction}%` },
+                  { label: "Unique tools",        val: liveStats.tools },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center justify-between">
+                    <span className="text-white/40 text-xs font-body">{item.label}</span>
+                    <span className="text-accent text-xs font-body font-bold tabular-nums">{item.val}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

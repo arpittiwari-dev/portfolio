@@ -11,6 +11,7 @@ import { useInView } from "react-intersection-observer";
 import { getSiteContent } from "@/lib/siteContent";
 import { defaultSiteContent, SiteContent, Project } from "@/lib/types";
 import { useTheme } from "@/lib/ThemeContext";
+import { useStats } from "@/lib/useStats";
 
 function Reveal({ children, delay = 0, className = "" }: {
   children: React.ReactNode; delay?: number; className?: string;
@@ -33,9 +34,20 @@ export default function HomePage() {
   const { ref: statsRef, inView: statsInView } = useInView({ threshold: 0.2, triggerOnce: true });
   const { config } = useTheme();
   const { sections, animations } = config;
+  const { stats, loading: statsLoading } = useStats();
 
   // Animation duration respects the speed multiplier from Design Studio
   const dur = (base: number) => base * animations.speed;
+
+  // Build the 4 stat items — live data when available, fallback to content.stats
+  const statItems = stats
+    ? [
+        { label: "Projects",     value: stats.projects,     suffix: "+" },
+        { label: "Screens",      value: stats.screens,      suffix: "+" },
+        { label: "Satisfaction", value: stats.satisfaction, suffix: "%" },
+        { label: "Tools Used",   value: stats.tools,        suffix: "+" },
+      ]
+    : content.stats;
 
   useEffect(() => {
     setContent(getSiteContent());
@@ -114,19 +126,28 @@ export default function HomePage() {
       {sections.showStats && (
         <section ref={statsRef} className="border-y border-white/[0.06] py-10 md:py-14 px-5 md:px-8">
           <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-            {content.stats.map((s, i) => (
-              <motion.div key={i}
-                initial={{ opacity: 0, y: 14 }}
-                animate={statsInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: dur(0.5), delay: i * 0.07 * animations.speed }}
-              >
-                <div className="font-display font-bold text-text-1 mb-0.5"
-                  style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)" }}>
-                  {statsInView ? <CountUp end={s.value} suffix={s.suffix} /> : `0${s.suffix}`}
-                </div>
-                <div className="text-text-3 text-sm font-body">{s.label}</div>
-              </motion.div>
-            ))}
+            {statsLoading
+              ? /* Skeleton */
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-10 w-24 rounded-lg bg-white/[0.06] animate-pulse" />
+                    <div className="h-4 w-16 rounded bg-white/[0.04] animate-pulse" />
+                  </div>
+                ))
+              : statItems.map((s, i) => (
+                  <motion.div key={s.label}
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={statsInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: dur(0.5), delay: i * 0.07 * animations.speed }}
+                  >
+                    <div className="font-display font-bold text-text-1 mb-0.5"
+                      style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)" }}>
+                      {statsInView ? <CountUp end={s.value} suffix={s.suffix} /> : `0${s.suffix}`}
+                    </div>
+                    <div className="text-text-3 text-sm font-body">{s.label}</div>
+                  </motion.div>
+                ))
+            }
           </div>
         </section>
       )}
