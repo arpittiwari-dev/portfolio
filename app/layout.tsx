@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import CustomCursor from "@/components/CustomCursor";
 import LayoutShell from "@/components/LayoutShell";
+import { ThemeProvider } from "@/lib/ThemeContext";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://arpittiwari.design";
 
@@ -44,8 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth">
       <body className="bg-background text-text-1 antialiased">
-        <CustomCursor />
-        <LayoutShell>{children}</LayoutShell>
+        <ThemeProvider>
+          <CustomCursor />
+          <LayoutShell>{children}</LayoutShell>
+        </ThemeProvider>
       </body>
     </html>
   );

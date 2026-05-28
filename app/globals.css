@@ -4,19 +4,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Design tokens ─────────────────────────────────────────────────────────── */
+/* ── Design tokens — defaults (overridden at runtime by ThemeContext) ──────── */
 :root {
-  --bg:          #080809;
-  --bg-elevated: #0f0f12;
-  --bg-subtle:   #141418;
-  --border:      rgba(255, 255, 255, 0.06);
-  --border-mid:  rgba(255, 255, 255, 0.10);
-  --text-1:      #EEECEA;
-  --text-2:      #7A7A8A;
-  --text-3:      #44445A;
-  --accent:      #6C63FF;
-  --accent-soft: rgba(108, 99, 255, 0.10);
-  --accent-mid:  rgba(108, 99, 255, 0.22);
+  /* Colors */
+  --accent:           #6C63FF;
+  --accent-hover:     #8880FF;
+  --accent-soft:      rgba(108, 99, 255, 0.10);
+  --accent-mid:       rgba(108, 99, 255, 0.22);
+  --bg:               #080809;
+  --bg-elevated:      #0f0f12;
+  --bg-subtle:        #141418;
+  --border:           rgba(255, 255, 255, 0.06);
+  --border-mid:       rgba(255, 255, 255, 0.10);
+  --text-1:           #EEECEA;
+  --text-2:           #7A7A8A;
+  --text-3:           #44445A;
+
+  /* Glow */
+  --glow-pulse:       0 0 20px rgba(108, 99, 255, 0.25);
+  --glow-shadow:      0 0 40px rgba(108, 99, 255, 0.15);
+  --glow-soft:        rgba(108, 99, 255, 0.10);
+
+  /* Glass */
+  --glass-bg:         rgba(255, 255, 255, 0.02);
+  --glass-blur:       8px;
+  --glass-border:     rgba(255, 255, 255, 0.06);
+
+  /* Border radius */
+  --radius-sm:        6px;
+  --radius-md:        12px;
+  --radius-lg:        16px;
+  --radius-xl:        20px;
+  --radius-2xl:       24px;
+
+  /* Shadows */
+  --shadow-card:      0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+
+  /* Noise */
+  --noise-opacity:    0.4;
+
+  /* Animation durations */
+  --anim-dur-fast:    0.20s;
+  --anim-dur-base:    0.40s;
+  --anim-dur-slow:    0.70s;
+  --anim-dur-slower:  1.00s;
+  --anim-stagger:     120ms;
+
+  /* Typography */
+  --font-display:     'Clash Display', sans-serif;
+  --font-body:        'Satoshi', sans-serif;
+  --heading-tracking: -0.03em;
+  --body-leading:     1.6;
+  --type-scale:       1;
+
+  /* Hero gradient */
+  --hero-gradient:    none;
 }
 
 /* ── Reset ─────────────────────────────────────────────────────────────────── */
@@ -117,7 +159,7 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.015'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.4;
+  opacity: var(--noise-opacity, 0.4);
 }
 
 /* ── Focus visible ─────────────────────────────────────────────────────────── */
@@ -136,3 +178,51 @@ body::before {
 /* ── Scrollbar hide utility ────────────────────────────────────────────────── */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Animation kill-switch ─────────────────────────────────────────────────── */
+.no-animations *,
+.no-animations *::before,
+.no-animations *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ── Default cursor override ───────────────────────────────────────────────── */
+.default-cursor,
+.default-cursor a,
+.default-cursor button,
+.default-cursor [data-cursor] {
+  cursor: auto !important;
+}
+.default-cursor .cursor-dot,
+.default-cursor .cursor-ring {
+  display: none !important;
+}
+
+/* ── Hero gradient overlay ─────────────────────────────────────────────────── */
+.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--hero-gradient);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Glass card utility ────────────────────────────────────────────────────── */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border-color: var(--glass-border);
+}
+
+/* ── Dynamic border radius ─────────────────────────────────────────────────── */
+.r-sm  { border-radius: var(--radius-sm); }
+.r-md  { border-radius: var(--radius-md); }
+.r-lg  { border-radius: var(--radius-lg); }
+.r-xl  { border-radius: var(--radius-xl); }
+.r-2xl { border-radius: var(--radius-2xl); }
+
+/* ── Dynamic glow ──────────────────────────────────────────────────────────── */
+.glow-card { box-shadow: var(--glow-shadow); }
+.glow-text { text-shadow: 0 0 20px var(--accent); }

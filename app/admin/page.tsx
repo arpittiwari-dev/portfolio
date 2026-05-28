@@ -9,11 +9,12 @@ import {
   LayoutDashboard, FolderOpen, Plus, Edit2, Trash2, Save,
   Eye, Image as ImageIcon, Search, ExternalLink, Globe, FileText,
   Grid, AlignJustify, Settings, Star, AlertCircle,
-  Zap, MessageSquare, Palette, BarChart2,
+  Zap, MessageSquare, Palette, BarChart2, Wand2,
   X, Link as LinkIcon, Menu,
 } from "lucide-react";
 import Link from "next/link";
 import ProjectEditor from "./ProjectEditor";
+import DesignView from "./DesignView";
 import { iCls, tCls, Toast, SectionCard, Field, ToggleRow } from "@/components/AdminUI";
 import { ChevronDown } from "lucide-react";
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "arpit2024";
@@ -50,15 +51,16 @@ function StatusBadge({ status }: { status: ProjectStatus }) {
   );
 }
 
-type AdminView = "dashboard" | "projects" | "skills" | "reviews" | "content" | "settings";
+type AdminView = "dashboard" | "projects" | "skills" | "reviews" | "content" | "design" | "settings";
 
 const NAV_ITEMS: { id: AdminView; label: string; icon: React.ElementType; badge?: string }[] = [
-  { id: "dashboard", label: "Dashboard",  icon: LayoutDashboard },
-  { id: "projects",  label: "Projects",   icon: FolderOpen },
-  { id: "content",   label: "Site Content", icon: Palette },
-  { id: "skills",    label: "Skills",     icon: BarChart2 },
-  { id: "reviews",   label: "Reviews",    icon: MessageSquare },
-  { id: "settings",  label: "Settings",   icon: Settings },
+  { id: "dashboard", label: "Dashboard",     icon: LayoutDashboard },
+  { id: "projects",  label: "Projects",      icon: FolderOpen },
+  { id: "content",   label: "Site Content",  icon: Palette },
+  { id: "design",    label: "Design Studio", icon: Wand2 },
+  { id: "skills",    label: "Skills",        icon: BarChart2 },
+  { id: "reviews",   label: "Reviews",       icon: MessageSquare },
+  { id: "settings",  label: "Settings",      icon: Settings },
 ];
 
 // ── Main AdminPage ────────────────────────────────────────────────────────────
@@ -258,6 +260,7 @@ export default function AdminPage() {
           {view === "dashboard" && <DashboardView stats={stats} projects={projects} onEdit={handleEdit} onNew={handleNew} setView={setView} />}
           {view === "projects"  && <ProjectsView  projects={filtered} loaded={loaded} onEdit={handleEdit} onDelete={handleDelete} onNew={handleNew} />}
           {view === "content"   && <ContentView   showToast={showToast} />}
+          {view === "design"    && <DesignView     showToast={showToast} />}
           {view === "skills"    && <SkillsView    showToast={showToast} />}
           {view === "reviews"   && <ReviewsView   showToast={showToast} />}
           {view === "settings"  && <SettingsView  showToast={showToast} />}
