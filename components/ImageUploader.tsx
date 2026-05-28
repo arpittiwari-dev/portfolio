@@ -20,11 +20,17 @@ function useResolvedSrc(value: string): string {
 }
 
 // ── Store a file: Sanity CDN if configured, else IndexedDB ───────────────────
-async function storeFile(file: File, existingKey?: string): Promise<string> {
+async function storeFile(
+  file: File,
+  existingKey?: string,
+  onStatus?: (msg: string) => void,
+): Promise<string> {
   if (SANITY_CONFIGURED) {
+    onStatus?.("Compressing…");
     const { url } = await apiUploadImage(file);
     return url;
   }
+  onStatus?.("Saving…");
   const key = existingKey && isIdbKey(existingKey) ? existingKey : makeKey();
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -49,6 +55,7 @@ export function SingleImageUploader({ label, value, onChange, onClear, hint }: S
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging]   = useState(false);
   const [loading, setLoading]     = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState("Uploading…");
   const [error, setError]         = useState<string | null>(null);
   const src = useResolvedSrc(value);
 
@@ -58,9 +65,10 @@ export function SingleImageUploader({ label, value, onChange, onClear, hint }: S
       return;
     }
     setLoading(true);
+    setLoadingMsg("Compressing…");
     setError(null);
     try {
-      const key = await storeFile(file, value);
+      const key = await storeFile(file, value, (msg) => setLoadingMsg(msg));
       onChange(key);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Upload failed";
@@ -126,7 +134,7 @@ export function SingleImageUploader({ label, value, onChange, onClear, hint }: S
           }
           <div className="text-center">
             <p className="text-text-secondary text-sm font-body">
-              {loading ? "Uploading…" : dragging ? "Drop to upload" : "Click or drag to upload"}
+              {loading ? loadingMsg : dragging ? "Drop to upload" : "Click or drag to upload"}
             </p>
             {hint && <p className="text-text-secondary/50 text-xs font-body mt-1">{hint}</p>}
           </div>
@@ -174,7 +182,7 @@ export function MultiImageUploader({ label, images, onChange }: MultiUploaderPro
   const [progress, setProgress]     = useState<UploadProgress[]>([]);
   const abortRef                    = useRef<AbortController | null>(null);
 
-  const isUploading = progress.some((p) => p.status === "uploading" || p.status === "pending");
+  const isUploading = progress.some((p) => p.status === "uploading" || p.status === "pending" || p.status === "compressing");
 
   const handleFiles = useCallback(async (files: FileList) => {
     const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
@@ -253,11 +261,15 @@ export function MultiImageUploader({ label, images, onChange }: MultiUploaderPro
   // Summarise upload progress for the drop zone label
   const progressLabel = (() => {
     if (!progress.length) return null;
-    const done  = progress.filter((p) => p.status === "done").length;
-    const total = progress.length;
-    const errs  = progress.filter((p) => p.status === "error").length;
-    if (errs > 0 && done + errs === total) return `${done}/${total} uploaded (${errs} failed)`;
-    if (done === total) return `${total} uploaded`;
+    const compressing = progress.filter((p) => p.status === "compressing").length;
+    const uploading   = progress.filter((p) => p.status === "uploading").length;
+    const done        = progress.filter((p) => p.status === "done").length;
+    const total       = progress.length;
+    const errs        = progress.filter((p) => p.status === "error").length;
+    if (compressing > 0)                    return `Compressing ${compressing} image${compressing > 1 ? "s" : ""}…`;
+    if (uploading > 0)                      return `Uploading ${done}/${total}…`;
+    if (errs > 0 && done + errs === total)  return `${done}/${total} uploaded (${errs} failed)`;
+    if (done === total && total > 0)        return `${total} uploaded`;
     return `Uploading ${done}/${total}…`;
   })();
 
@@ -299,7 +311,7 @@ export function MultiImageUploader({ label, images, onChange }: MultiUploaderPro
           {progressLabel ?? (dragging ? "Drop images here" : "Click or drag multiple images here")}
         </p>
         <p className="text-text-secondary/40 text-xs font-body">
-          PNG, JPG, WebP · Max 10 MB each · First image = cover
+          PNG, JPG, WebP · Up to 50 MB · Auto-compressed · First image = cover
         </p>
       </div>
 
@@ -308,13 +320,23 @@ export function MultiImageUploader({ label, images, onChange }: MultiUploaderPro
         <div className="space-y-1.5">
           {progress.map((p, i) => (
             <div key={i} className="flex items-center gap-2 text-xs font-body px-3 py-2 rounded-lg bg-white/[0.03] border border-white/5">
-              {p.status === "uploading" || p.status === "pending"
-                ? <Loader2 size={12} className="text-accent animate-spin flex-shrink-0" />
-                : p.status === "done"
-                  ? <CheckCircle size={12} className="text-green-400 flex-shrink-0" />
-                  : <AlertCircle size={12} className="text-red-400 flex-shrink-0" />
+              {p.status === "compressing"
+                ? <Loader2 size={12} className="text-yellow-400 animate-spin flex-shrink-0" />
+                : p.status === "uploading" || p.status === "pending"
+                  ? <Loader2 size={12} className="text-accent animate-spin flex-shrink-0" />
+                  : p.status === "done"
+                    ? <CheckCircle size={12} className="text-green-400 flex-shrink-0" />
+                    : <AlertCircle size={12} className="text-red-400 flex-shrink-0" />
               }
               <span className="text-text-secondary truncate flex-1">{p.file.name}</span>
+              {p.status === "compressing" && (
+                <span className="text-yellow-400/70 text-xs">compressing…</span>
+              )}
+              {p.status === "done" && p.compressionRatio !== undefined && p.compressionRatio < 0.99 && (
+                <span className="text-green-400/60 text-xs flex-shrink-0">
+                  {(p.originalSizeMB ?? 0).toFixed(1)}MB → {(p.finalSizeMB ?? 0).toFixed(1)}MB
+                </span>
+              )}
               {p.status === "error" && (
                 <span className="text-red-400 truncate max-w-[200px]">{p.error}</span>
               )}
