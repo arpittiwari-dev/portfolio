@@ -87,7 +87,7 @@ export interface UploadProgress {
 }
 
 // ── Client-side validation ────────────────────────────────────────────────────
-const MAX_SIZE    = 10 * 1024 * 1024;
+const MAX_SIZE = 5 * 1024 * 1024;
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml", "image/avif"];
 
 function validateFile(file: File): void {
@@ -100,59 +100,116 @@ function validateFile(file: File): void {
 // ── Strategy A: Direct browser → Sanity upload (no body size limit) ───────────
 // The server issues a signed upload URL; the browser POSTs directly to Sanity CDN.
 async function uploadDirect(file: File, signal?: AbortSignal): Promise<UploadResult> {
-  // 1. Get upload credentials from our server
+  // 1. Get upload credentials from API
   const params = new URLSearchParams({
-    filename:    file.name,
+    filename: file.name,
     contentType: file.type,
   });
 
-  let creds: { uploadUrl: string; token: string; filename: string; contentType: string };
+  let creds: {
+    uploadUrl: string;
+    token: string;
+  };
+
   try {
     const res = await fetch(`/api/upload/?${params}`, {
-      headers: { "x-admin-token": adminToken() },
+      headers: {
+        "x-admin-token": adminToken(),
+      },
       signal,
     });
+
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.error ?? `Credential fetch failed: HTTP ${res.status}`);
+
+      throw new Error(
+        body.error || `Credential fetch failed: HTTP ${res.status}`
+      );
     }
+
     creds = await res.json();
   } catch (err) {
-    if (err instanceof DOMException && err.name === "AbortError") throw new Error("Upload cancelled");
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("Upload cancelled");
+    }
+
     throw err;
   }
 
-  // 2. POST file directly to Sanity from the browser
-  const formData = new FormData();
-  formData.append("file", file, creds.filename);
+  // 2. Validate before upload
+  console.log("Uploading file:", {
+    name: file.name,
+    type: file.type,
+    sizeMB: (file.size / 1024 / 1024).toFixed(2),
+  });
 
+  // 3. Upload directly to Sanity
   let sanityRes: Response;
+
   try {
     sanityRes = await fetch(creds.uploadUrl, {
-      method:  "POST",
+      method: "POST",
+
       headers: {
-        Authorization:  `Bearer ${creds.token}`,
-        "Content-Type": creds.contentType,
+        Authorization: `Bearer ${creds.token}`,
       },
-      body:   file,   // send raw file body for direct upload
+
+      // IMPORTANT:
+      // DO NOT manually set Content-Type
+      // Browser automatically handles it correctly
+      body: file,
+
       signal,
     });
   } catch (err) {
-    if (err instanceof DOMException && err.name === "AbortError") throw new Error("Upload cancelled");
-    throw new Error(`Network error: ${err instanceof Error ? err.message : String(err)}`);
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("Upload cancelled");
+    }
+
+    throw new Error(
+      `Network error: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
   }
 
+  // 4. Parse Sanity response safely
+  let data: any = {};
+
+  try {
+    data = await sanityRes.json();
+  } catch {
+    throw new Error(
+      `Sanity upload failed with HTTP ${sanityRes.status}`
+    );
+  }
+
+  // 5. Handle Sanity errors
   if (!sanityRes.ok) {
-    const body = await sanityRes.json().catch(() => ({}));
-    throw new Error(`Sanity rejected upload: ${body.message ?? sanityRes.status}`);
+    console.error("Sanity upload error:", data);
+
+    throw new Error(
+      data?.message ||
+      data?.error ||
+      `Sanity upload failed (${sanityRes.status})`
+    );
   }
 
-  const data = await sanityRes.json();
-  const asset = data.document ?? data;
-  if (!asset?.url) throw new Error("Sanity response missing asset URL");
+  const asset = data.document || data;
 
-  return { url: asset.url, assetId: asset._id };
+  if (!asset?.url) {
+    console.error("Invalid Sanity response:", data);
+
+    throw new Error("Sanity response missing asset URL");
+  }
+
+  return {
+    url: asset.url,
+    assetId: asset._id,
+  };
 }
+
+
 
 // ── Strategy B: Proxy upload through our API route ────────────────────────────
 // Fallback when direct upload is unavailable. Subject to Netlify's body size limit.
