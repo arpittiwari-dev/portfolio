@@ -15,7 +15,10 @@ export async function GET(req: NextRequest) {
   if (!rateLimit(getIp(req), 60)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
-  if (!SANITY_CONFIGURED) return NextResponse.json([]);
+  if (!SANITY_CONFIGURED) {
+    const { staticProjects } = await import("@/lib/projects");
+    return NextResponse.json(staticProjects);
+  }
   try {
     const docs = await sanityClient.fetch(`
       *[_type == "project"] | order(order asc) {

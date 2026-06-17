@@ -3,10 +3,10 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Button from "@/components/Button";
-import { ArrowUpRight, Star } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useInView } from "react-intersection-observer";
-import { getSiteContent, getSkills, getReviews, defaultSkills, defaultReviews } from "@/lib/siteContent";
-import { defaultSiteContent, SiteContent, Skill, Review } from "@/lib/types";
+import { getSiteContent, getSkills, defaultSkills } from "@/lib/siteContent";
+import { defaultSiteContent, SiteContent, Skill } from "@/lib/types";
 
 function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const { ref, inView } = useInView({ threshold: 0.1, triggerOnce: true });
@@ -23,16 +23,13 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
 export default function AboutPage() {
   const [content, setContent] = useState<SiteContent>(defaultSiteContent);
   const [skills, setSkills]   = useState<Skill[]>(defaultSkills);
-  const [reviews, setReviews] = useState<Review[]>(defaultReviews);
 
   useEffect(() => {
     setContent(getSiteContent());
     setSkills(getSkills());
-    setReviews(getReviews());
   }, []);
 
   const initials = content.aboutName.split(" ").map((n) => n[0]).join("").slice(0, 2);
-  const featuredReviews = reviews.filter((r) => r.featured);
 
   const skillsByCategory: Record<string, Skill[]> = {
     "UI Design":      skills.filter((s) => s.category === "ui"),
@@ -207,35 +204,17 @@ export default function AboutPage() {
         </section>
       )}
 
-      {/* Reviews */}
-      {featuredReviews.length > 0 && (
-        <section className="py-14 md:py-20 px-5 md:px-8 border-t border-white/[0.06]">
-          <div className="max-w-6xl mx-auto">
-            <Reveal className="mb-8 md:mb-12">
-              <p className="text-accent text-[10px] font-body font-bold tracking-[0.2em] uppercase mb-3">Testimonials</p>
-              <h2 className="font-display font-bold text-text-1" style={{ fontSize: "clamp(1.5rem, 2.5vw, 2.25rem)" }}>What clients say.</h2>
-            </Reveal>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {featuredReviews.map((r, i) => (
-                <Reveal key={r.id} delay={i * 0.08}>
-                  <div className="p-5 rounded-2xl border border-white/[0.07] bg-surface hover:border-white/[0.12] transition-colors h-full flex flex-col">
-                    <div className="flex gap-0.5 mb-3">
-                      {[1,2,3,4,5].map((n) => (
-                        <Star key={n} size={13} className={n <= r.rating ? "text-yellow-400 fill-yellow-400" : "text-white/15"} />
-                      ))}
-                    </div>
-                    <p className="text-text-2 font-body text-sm leading-relaxed flex-1 mb-4">&ldquo;{r.text}&rdquo;</p>
-                    <div>
-                      <p className="text-text-1 font-body font-semibold text-sm">{r.name}</p>
-                      <p className="text-text-3 text-xs font-body mt-0.5">{r.role}{r.company ? ` · ${r.company}` : ""}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Testimonials placeholder */}
+      <section className="py-14 md:py-20 px-5 md:px-8 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto">
+          <Reveal>
+            <p className="text-accent text-[10px] font-body font-bold tracking-[0.2em] uppercase mb-3">Testimonials</p>
+            <p className="text-text-2 font-body text-lg leading-relaxed">
+              Currently completing my first client projects — see my work above.
+            </p>
+          </Reveal>
+        </div>
+      </section>
     </>
   );
 }

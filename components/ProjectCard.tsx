@@ -66,7 +66,7 @@ export default function ProjectCard({ project, index = 0 }: Props) {
           {/* Hover overlay */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-250 z-20">
             <span className="flex items-center gap-1.5 bg-accent text-white font-body font-medium text-sm px-4 py-2 rounded-lg translate-y-1.5 group-hover:translate-y-0 transition-transform duration-250">
-              View Case Study <ArrowUpRight size={13} />
+              View Project <ArrowUpRight size={13} />
             </span>
           </div>
         </div>
@@ -89,6 +89,22 @@ export default function ProjectCard({ project, index = 0 }: Props) {
                   </span>
                 ))}
               </div>
+            )}
+            {project.prototypeLink && project.prototypeLink !== "#" && (
+              <a
+                href={project.prototypeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 mt-3 text-[10px] font-body font-medium text-accent border border-accent/30 px-2.5 py-1 rounded-md hover:bg-accent/10 transition-colors"
+              >
+                View Figma Prototype <ArrowUpRight size={10} />
+              </a>
+            )}
+            {project.prototypeLink === "#" && (
+              <span className="inline-flex items-center gap-1 mt-3 text-[10px] font-body font-medium text-text-3 border border-white/[0.07] px-2.5 py-1 rounded-md cursor-default">
+                Figma Prototype — Coming Soon
+              </span>
             )}
           </div>
           <div className="flex-shrink-0 w-7 h-7 rounded-lg border border-white/[0.08] flex items-center justify-center group-hover:border-accent group-hover:bg-accent transition-all duration-200 mt-0.5">

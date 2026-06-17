@@ -258,7 +258,7 @@ function TypographyPanel({ typography, onChange }: { typography: ThemeTypography
           <p style={{ fontFamily: `'${typography.fontDisplay}', sans-serif`, letterSpacing: typography.headingTracking === "tight" ? "-0.03em" : typography.headingTracking === "wide" ? "0.02em" : "-0.01em" }}
             className="text-white font-bold text-2xl">Designing interfaces that convert.</p>
           <p style={{ fontFamily: `'${typography.fontBody}', sans-serif`, lineHeight: typography.bodyLeading === "compact" ? "1.4" : typography.bodyLeading === "relaxed" ? "1.8" : "1.6" }}
-            className="text-white/50 text-sm">UI/UX Designer focused on mobile apps, e-commerce, and product UI. Every pixel has a purpose.</p>
+            className="text-white/50 text-sm">I design mobile apps and e-commerce UIs in Figma — clean, conversion-focused, and delivered fast.</p>
         </div>
       </SectionCard>
     </div>

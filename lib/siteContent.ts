@@ -21,28 +21,7 @@ export function saveSiteContent(content: SiteContent): void {
 }
 
 // ── Reviews ───────────────────────────────────────────────────────────────────
-export const defaultReviews: Review[] = [
-  {
-    id: "1",
-    name: "Rahul Mehta",
-    role: "Product Manager",
-    company: "TechCorp",
-    text: "Arpit delivered an exceptional UI design that exceeded our expectations. The attention to detail and user-centric approach was outstanding.",
-    rating: 5,
-    featured: true,
-    date: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Priya Sharma",
-    role: "Founder",
-    company: "StartupXYZ",
-    text: "Working with Arpit was a great experience. He understood our brand vision perfectly and translated it into a beautiful, functional design.",
-    rating: 5,
-    featured: true,
-    date: "2024-02-20",
-  },
-];
+export const defaultReviews: Review[] = [];
 
 export function getReviews(): Review[] {
   if (typeof window === "undefined") return defaultReviews;

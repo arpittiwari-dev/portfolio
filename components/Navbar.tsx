@@ -6,9 +6,8 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
-  { href: "/work",    label: "Work" },
-  { href: "/about",   label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/work",  label: "Work" },
+  { href: "/about", label: "About" },
 ];
 
 export default function Navbar() {

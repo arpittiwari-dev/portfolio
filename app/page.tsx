@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import ProjectCard from "@/components/ProjectCard";
-import SkillsMarquee from "@/components/SkillsMarquee";
 import CountUp from "@/components/CountUp";
 import Button from "@/components/Button";
 import { useInView } from "react-intersection-observer";
@@ -117,7 +116,25 @@ export default function HomePage() {
             className="flex flex-wrap items-center gap-3"
           >
             <Button href="/work" size="lg">View Work <ArrowUpRight size={14} /></Button>
-            <Button href="/about" variant="ghost" size="lg">About Me</Button>
+          </motion.div>
+
+          {/* Hero stats row */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: dur(0.5), delay: 0.58 }}
+            className="flex flex-wrap items-center gap-6 mt-7"
+          >
+            {[
+              { value: "5 Projects", label: "Completed" },
+              { value: "50+", label: "Figma Components" },
+              { value: "Available Now", label: "" },
+            ].map((s) => (
+              <div key={s.value} className="flex items-center gap-1.5">
+                <span className="text-text-1 text-xs font-body font-bold tracking-[0.12em] uppercase">{s.value}</span>
+                {s.label && <span className="text-text-3 text-xs font-body tracking-[0.08em] uppercase">{s.label}</span>}
+              </div>
+            ))}
           </motion.div>
         </div>
       </section>
@@ -178,18 +195,78 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* PROCESS */}
+      {sections.showSelectedWork && (
+        <section className="py-14 md:py-24 px-5 md:px-8 border-t border-white/[0.06]">
+          <div className="max-w-6xl mx-auto">
+            <Reveal className="mb-10 md:mb-14">
+              <p className="text-accent text-[10px] font-body font-bold tracking-[0.2em] uppercase mb-3">Process</p>
+              <h2 className="font-display font-bold text-text-1 leading-tight"
+                style={{ fontSize: "clamp(1.75rem, 3.5vw, 3rem)" }}>
+                How I work.
+              </h2>
+            </Reveal>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  step: "01",
+                  title: "Discover",
+                  body: "I start with your goals, your users, and your current pain points.",
+                },
+                {
+                  step: "02",
+                  title: "Design",
+                  body: "Wireframes first, high-fidelity Figma after alignment. No surprises.",
+                },
+                {
+                  step: "03",
+                  title: "Deliver",
+                  body: "Annotated Figma files, component library, and dev-ready handoff.",
+                },
+              ].map((item, i) => (
+                <Reveal key={item.step} delay={i * 0.1}>
+                  <div className="p-6 rounded-2xl border border-white/[0.07] bg-surface hover:border-white/[0.12] transition-colors h-full">
+                    <span className="font-display font-bold text-accent/40 text-4xl leading-none mb-4 block">{item.step}</span>
+                    <h3 className="font-display font-bold text-text-1 text-lg mb-2">{item.title}</h3>
+                    <p className="text-text-2 font-body text-sm leading-relaxed">{item.body}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* SKILLS */}
       {sections.showSkills && (
-        <section className="py-12 md:py-20 overflow-hidden border-t border-white/[0.06]">
-          <div className="max-w-6xl mx-auto px-5 md:px-8 mb-8 md:mb-10">
-            <Reveal>
+        <section className="py-12 md:py-20 border-t border-white/[0.06]">
+          <div className="max-w-6xl mx-auto px-5 md:px-8">
+            <Reveal className="mb-8 md:mb-10">
               <p className="text-accent text-[10px] font-body font-bold tracking-[0.2em] uppercase mb-3">Skills & Tools</p>
               <h2 className="font-display font-bold text-text-1" style={{ fontSize: "clamp(1.5rem, 2.5vw, 2.25rem)" }}>
                 What I bring to the table.
               </h2>
             </Reveal>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {[
+                { name: "Figma", detail: "UI Design & Prototyping" },
+                { name: "User Research", detail: "Interviews · Usability Tests" },
+                { name: "Mobile UI", detail: "iOS & Android patterns" },
+                { name: "Design Systems", detail: "Components · Variables · Tokens" },
+                { name: "E-commerce UI", detail: "Conversion-focused layouts" },
+                { name: "Figma Handoff", detail: "Annotated dev-ready files" },
+              ].map((skill) => (
+                <div key={skill.name}
+                  className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.07] bg-surface hover:border-accent/30 transition-colors">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 flex-shrink-0 opacity-70" />
+                  <div>
+                    <p className="font-body font-semibold text-text-1 text-sm">{skill.name}</p>
+                    <p className="text-text-3 text-xs font-body mt-0.5">{skill.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <SkillsMarquee />
         </section>
       )}
 
