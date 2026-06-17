@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 import CustomCursor from "@/components/CustomCursor";
 import LayoutShell from "@/components/LayoutShell";
@@ -45,6 +46,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth">
       <body className="bg-background text-text-1 antialiased">
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-6HW9BGFN97"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-6HW9BGFN97');
+          `}
+        </Script>
         <ThemeProvider>
           <CustomCursor />
           <LayoutShell>{children}</LayoutShell>
