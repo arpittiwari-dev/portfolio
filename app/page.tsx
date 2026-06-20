@@ -118,24 +118,7 @@ export default function HomePage() {
             <Button href="/work" size="lg">View Work <ArrowUpRight size={14} /></Button>
           </motion.div>
 
-          {/* Hero stats row */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: dur(0.5), delay: 0.58 }}
-            className="flex flex-wrap items-center gap-6 mt-7"
-          >
-            {[
-              { value: "5 Projects", label: "Completed" },
-              { value: "50+", label: "Figma Components" },
-              { value: "Available Now", label: "" },
-            ].map((s) => (
-              <div key={s.value} className="flex items-center gap-1.5">
-                <span className="text-text-1 text-xs font-body font-bold tracking-[0.12em] uppercase">{s.value}</span>
-                {s.label && <span className="text-text-3 text-xs font-body tracking-[0.08em] uppercase">{s.label}</span>}
-              </div>
-            ))}
-          </motion.div>
+
         </div>
       </section>
 
