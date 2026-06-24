@@ -198,6 +198,12 @@ export async function getAllProjects(): Promise<Project[]> {
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | undefined> {
+  // Always check static projects first
+  const staticMatch = staticProjects.find(
+    (p) => p.slug.toLowerCase().trim() === slug.toLowerCase().trim()
+  );
+  if (staticMatch) return staticMatch;
+
   if (!SANITY_CONFIGURED) return undefined;
   const fields = `
     _id, title, "slug": slug.current, status, featured, order,
