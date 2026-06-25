@@ -173,7 +173,7 @@ export const staticProjects: Project[] = [
 const SANITY_CONFIGURED = !!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 
 const GROQ = `
-  *[_type == "project"] | order(order asc) {
+  *[_type == "project"] | order(order desc) {
     _id, title, "slug": slug.current, status, featured, order,
     category, tags, accentColor, shortDescription,
     thumbnail,
@@ -187,7 +187,7 @@ const GROQ = `
 `;
 
 export async function getAllProjects(): Promise<Project[]> {
-  if (!SANITY_CONFIGURED) return staticProjects;
+  if (!SANITY_CONFIGURED) return [...staticProjects].reverse();
   try {
     const docs = await sanityClient.fetch(GROQ);
     return docs.map(fromSanityProject);

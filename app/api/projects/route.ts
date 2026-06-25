@@ -17,11 +17,11 @@ export async function GET(req: NextRequest) {
   }
   if (!SANITY_CONFIGURED) {
     const { staticProjects } = await import("@/lib/projects");
-    return NextResponse.json(staticProjects);
+    return NextResponse.json([...staticProjects].reverse());
   }
   try {
     const docs = await sanityClient.fetch(`
-      *[_type == "project"] | order(order asc) {
+      *[_type == "project"] | order(order desc) {
         _id, title, "slug": slug.current, status, featured, order,
         category, tags, accentColor, shortDescription,
         thumbnail,
